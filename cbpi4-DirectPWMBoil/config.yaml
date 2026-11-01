@@ -1,0 +1,7 @@
+name: cbpi4-DirectPWMBoil
+version: 1.0.0
+description: Direct PWM boil logic for CBPi4 - simple two-stage power control
+author: zzorrro
+url: https://github.com/zzorrro/cbpi4-DirectPWMBoil
+license: MIT
+cbpi_version: ">=4.0.0"
