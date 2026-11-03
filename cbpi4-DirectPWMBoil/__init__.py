@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
 import asyncio
 import logging
 from cbpi.api import *
+from cbpi.api.dataclasses import NotificationType  # ← ДОБАВЛЕН ЭТОТ ИМПОРТ
+
+logger = logging.getLogger(__name__)
 
 @parameters([
     Property.Number(label="Power_Before", configurable=True, default_value=100, description="Power (%) before transition temperature is reached."),
@@ -28,23 +32,33 @@ class DirectPWMBoil(CBPiKettleLogic):
             
             heat_percent_old = power_before
             
-            # === НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ РУЧНОГО УПРАВЛЕНИЯ ===
+            # Инициализация переменных для ручного управления
             self.manual_override_active = False
             self.manual_override_power = 0
             self.last_auto_power = -1
 
+            logger.info(f"DirectPWMBoil started: power_before={power_before}%, transition_temp={transition_temp}°C, power_after={power_after}%")
+            
             await self.actor_on(self.heater, power_before)
 
             while self.running == True:
                 # Безопасное получение данных с сенсора
                 sensor_data = self.get_sensor_value(self.kettle.sensor)
                 if sensor_data is None:
+                    logger.warning("DirectPWMBoil: No sensor data, waiting...")
                     await asyncio.sleep(sampleTime)
                     continue
                     
                 current_temp = float(sensor_data.get("value", 0))
                 target_temp = self.get_kettle_target_temp(self.id)
-                current_kettle_power = self.heater_actor.power
+                
+                # Получаем текущую мощность актора
+                try:
+                    current_kettle_power = float(self.heater_actor.power)
+                except:
+                    current_kettle_power = 0
+                
+                logger.debug(f"DirectPWMBoil: temp={current_temp}°C, target={target_temp}°C, current_power={current_kettle_power}%, manual_override={self.manual_override_active}")
                 
                 # === ГЛАВНАЯ ЛОГИКА ===
                 
@@ -61,7 +75,7 @@ class DirectPWMBoil(CBPiKettleLogic):
                             self.manual_override_active = True
                             self.manual_override_power = current_kettle_power
                             self.cbpi.notify("DirectPWMBoil", f"Manual override: {current_kettle_power}% until temp drops", NotificationType.SUCCESS)
-                            logging.info(f"DirectPWMBoil: Manual override activated at {current_kettle_power}%")
+                            logger.info(f"DirectPWMBoil: Manual override activated at {current_kettle_power}%")
 
                     # Применяем мощность: либо ручную, либо автоматическую
                     if self.manual_override_active:
@@ -76,25 +90,8 @@ class DirectPWMBoil(CBPiKettleLogic):
                     if self.manual_override_active:
                         self.manual_override_active = False
                         self.last_auto_power = -1
-                        logging.info("DirectPWMBoil: Temp dropped below transition. Manual override reset.")
+                        logger.info("DirectPWMBoil: Temp dropped below transition. Manual override reset.")
                     
                     heat_percent = power_before
 
-                # Применяем мощность только если она изменилась
-                if (heat_percent_old != heat_percent) or (heat_percent != current_kettle_power):
-                    await self.actor_set_power(self.heater, heat_percent)
-                    heat_percent_old = heat_percent
-                    
-                await asyncio.sleep(sampleTime)
-
-        except asyncio.CancelledError:
-            pass
-        except Exception as e:
-            logging.error("DirectPWMBoil Error {}".format(e))
-        finally:
-            self.running = False
-            await self.actor_off(self.heater)
-
-
-def setup(cbpi):
-    cbpi.plugin.register("DirectPWMBoil", DirectPWMBoil)
+                # Применяем мощность только
