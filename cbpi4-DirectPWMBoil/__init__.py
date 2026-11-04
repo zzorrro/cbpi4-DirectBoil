@@ -31,7 +31,6 @@ class DirectPWMBoil(CBPiKettleLogic):
             
             heat_percent_old = power_before
             
-            # Переменные состояния
             self.manual_override_active = False
             self.current_phase = None
 
@@ -51,7 +50,6 @@ class DirectPWMBoil(CBPiKettleLogic):
                 except:
                     current_kettle_power = 0
                 
-                # === ШАГ 1: Определяем текущую фазу ===
                 if current_temp >= float(transition_temp):
                     new_phase = "BOIL"
                     desired_auto_power = power_after
@@ -59,26 +57,22 @@ class DirectPWMBoil(CBPiKettleLogic):
                     new_phase = "HEAT"
                     desired_auto_power = power_before
                 
-                # === ШАГ 2: Произошла ли смена фазы? ===
                 if self.current_phase != new_phase:
-                    # Фаза изменилась! Сбрасываем ручное управление
                     self.manual_override_active = False
                     self.current_phase = new_phase
                     heat_percent = desired_auto_power
                     logger.info(f"PHASE CHANGE to {new_phase}! Manual override reset. Power: {desired_auto_power}%")
                 else:
-                    # Фаза та же. Проверяем ручное управление.
                     if self.manual_override_active:
-                        # РУЧНОЕ УПРАВЛЕНИЕ АКТИВНО: постоянно читаем текущее положение ползунка
                         heat_percent = current_kettle_power
                     else:
-                        # АВТОМАТИКА: проверяем, не тронул ли пользователь ползунок
                         if abs(current_kettle_power - desired_auto_power) > 0.5:
                             self.manual_override_active = True
+                            heat_percent = current_kettle_power # ИСПРАВЛЕНИЕ: сразу берем ручное значение
                             logger.info(f"Manual override activated at {current_kettle_power}%")
-                        heat_percent = desired_auto_power
+                        else:
+                            heat_percent = desired_auto_power
 
-                # === ШАГ 3: Применяем мощность ===
                 if (heat_percent_old != heat_percent) or (heat_percent != current_kettle_power):
                     logger.info(f"DirectPWMBoil: Setting power to {heat_percent}%")
                     await self.actor_set_power(self.heater, heat_percent)
