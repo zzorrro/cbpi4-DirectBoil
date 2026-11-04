@@ -33,8 +33,7 @@ class DirectPWMBoil(CBPiKettleLogic):
             
             # Переменные состояния
             self.manual_override_active = False
-            self.manual_override_power = 0
-            self.current_phase = None # Начинаем без фазы
+            self.current_phase = None
 
             logger.info(f"DirectPWMBoil started: before={power_before}%, transition={transition_temp}°C, after={power_after}%")
             await self.actor_on(self.heater, power_before)
@@ -62,22 +61,21 @@ class DirectPWMBoil(CBPiKettleLogic):
                 
                 # === ШАГ 2: Произошла ли смена фазы? ===
                 if self.current_phase != new_phase:
-                    # Фаза изменилась! Принудительно сбрасываем ручное управление
+                    # Фаза изменилась! Сбрасываем ручное управление
                     self.manual_override_active = False
                     self.current_phase = new_phase
                     heat_percent = desired_auto_power
-                    logger.info(f"PHASE CHANGE to {new_phase}! Manual override reset. Power set to {desired_auto_power}%")
+                    logger.info(f"PHASE CHANGE to {new_phase}! Manual override reset. Power: {desired_auto_power}%")
                 else:
-                    # Фаза та же. Проверяем ручное вмешательство.
-                    if not self.manual_override_active:
+                    # Фаза та же. Проверяем ручное управление.
+                    if self.manual_override_active:
+                        # РУЧНОЕ УПРАВЛЕНИЕ АКТИВНО: постоянно читаем текущее положение ползунка
+                        heat_percent = current_kettle_power
+                    else:
+                        # АВТОМАТИКА: проверяем, не тронул ли пользователь ползунок
                         if abs(current_kettle_power - desired_auto_power) > 0.5:
                             self.manual_override_active = True
-                            self.manual_override_power = current_kettle_power
                             logger.info(f"Manual override activated at {current_kettle_power}%")
-
-                    if self.manual_override_active:
-                        heat_percent = self.manual_override_power
-                    else:
                         heat_percent = desired_auto_power
 
                 # === ШАГ 3: Применяем мощность ===
