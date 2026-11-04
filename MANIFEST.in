@@ -1,6 +1,6 @@
 include README.md
 include LICENSE
-include cbpi4_DirectPWMBoil/config.yaml
-include cbpi4_DirectPWMBoil/*.yaml
-include cbpi4_DirectPWMBoil/*.txt
-include cbpi4_DirectPWMBoil/*.rst
+include cbpi4_DirectBoil/config.yaml
+include cbpi4_DirectBoil/*.yaml
+include cbpi4_DirectBoil/*.txt
+include cbpi4_DirectBoil/*.rst
