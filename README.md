@@ -1,6 +1,6 @@
-# cbpi4-DirectPWMBoil
+# cbpi4-DirectBoil
 
-Плагин логики нагрева котла с прямым управлением PWM для CraftBeerPi 4.
+Плагин логики нагрева котла с прямым управлением мощностью нагрева для CraftBeerPi 4.
 
 ## Как это работает
 
@@ -39,7 +39,7 @@
 2. Выберите котел для кипячения (например, "Сусловарочный котел")
 3. В поле **Sensor** выберите датчик температуры котла
 4. В поле **Actor** (Heater) выберите ваш GPIOPWMActor
-5. В поле **Logic** выберите **DirectPWMBoil**
+5. В поле **Logic** выберите **DirectBoil**
 6. Заполните параметры:
    - `Power_Before`: 100
    - `Transition_Temp`: 98
@@ -51,4 +51,4 @@
 ### Через GitHub
 
 ```bash
-pipx runpip cbpi4 install git+https://github.com/zzorrro/cbpi4-DirectPWMBoil.git
+pipx runpip cbpi4 install git+https://github.com/zzorrro/cbpi4-DirectBoil.git
