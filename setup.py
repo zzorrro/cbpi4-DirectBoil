@@ -1,23 +1,21 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='cbpi4-DirectPWMBoil',
-    version='1.0.0',
-    description='Direct PWM boil logic for CBPi4 - simple two-stage power control',
-    author='Sammy Brewery',
-    author_email='your.email@example.com',
-    url='https://github.com/zzorrro/cbpi4-DirectPWMBoil',
+    name='cbpi4-DirectBoil',  # ← ИЗМЕНЕНО: старое имя cbpi4-DirectPWMBoil
+    version='0.1.0',
+    description='Direct Boil Logic Plugin for CBPi4 (Universal Actor)', # ← ОПЦИОНАЛЬНО: можно обновить описание
+    author='zorro',
+    author_email='',
+    url='https://github.com/zzorrro/cbpi4-DirectBoil', # ← ИЗМЕНЕНО: новая ссылка на репозиторий
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        '': ['*.json', '*.md', '*.yaml']
+        # Если в папке есть дополнительные файлы (например, иконки или конфиги), 
+        # их можно указать здесь, но обычно для логики это не требуется.
     },
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: End Users/Desktop',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3',
-        'Topic :: Home Automation',
+    install_requires=[
+        'cbpi4'
     ],
+    python_requires='>=3.7',
 )
