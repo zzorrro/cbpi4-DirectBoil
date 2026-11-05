@@ -10,9 +10,6 @@ setup(
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
-    package_data={
-        # Если в папке есть дополнительные файлы (например, иконки или конфиги), 
-        # их можно указать здесь, но обычно для логики это не требуется.
-    
+    package_data={        
     python_requires='>=3.7',
 )
