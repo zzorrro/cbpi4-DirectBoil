@@ -1,15 +1,11 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='cbpi4-DirectBoil',  # ← ИЗМЕНЕНО: старое имя cbpi4-DirectPWMBoil
+    name='cbpi4-DirectBoil',
     version='0.1.0',
-    description='Direct Boil Logic Plugin for CBPi4 (Universal Actor)', # ← ОПЦИОНАЛЬНО: можно обновить описание
+    description='Direct Boil Logic Plugin for CBPi4',
     author='zorro',
-    author_email='',
-    url='https://github.com/zzorrro/cbpi4-DirectBoil', # ← ИЗМЕНЕНО: новая ссылка на репозиторий
+    url='https://github.com/zzorrro/cbpi4-DirectBoil',
     license='MIT',
-    packages=find_packages(),
-    include_package_data=True,
-    package_data={        
-    python_requires='>=3.7',
+    packages=find_packages()
 )
